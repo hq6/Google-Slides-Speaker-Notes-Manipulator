@@ -13,11 +13,11 @@ the notes back into Google Slides.
 
 # Usage
 
-Extract speaker notes from a slide.
+Extract speaker notes from a presentation.
 
     ./ExtractNotes.py <presentation_id>  >Notes.txt
 
-Insert speaker notes into a slide
+Insert speaker notes into a presentation.
 
     ./InsertNotes.py <presentation_id> Notes.txt
 
@@ -44,8 +44,6 @@ sudo pip install --upgrade oauth2client
 ```
  pip install docopt
 ```
-
-
 
 # One-Time Setup
 

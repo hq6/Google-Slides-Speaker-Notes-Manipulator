@@ -3,11 +3,6 @@
 # Compatibility with Python3
 from __future__ import print_function
 
-# Imports for Google APIs
-from googleapiclient.discovery import build
-from httplib2 import Http
-from oauth2client import file, client, tools
-
 # Parsing options
 from docopt import docopt
 
@@ -16,30 +11,8 @@ from sys import exit, argv
 # Nested dictionaries
 from collections import defaultdict
 
-# If modifying these scopes, delete the file token.json.
-SCOPES = 'https://www.googleapis.com/auth/presentations.readonly'
-
-def getService():
-    store = file.Storage('token.json')
-    creds = store.get()
-    if not creds or creds.invalid:
-        flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
-        creds = tools.run_flow(flow, store)
-    return build('slides', 'v1', http=creds.authorize(Http()))
-
-def tryParse(element):
-    textElements = []
-    try:
-      textElements = element['shape']['text']['textElements']
-    except:
-      pass
-
-    # print(textElements)
-    for text in textElements:
-      try:
-        print(text['textRun']['content'].encode('utf-8').strip())
-      except:
-        pass
+# Common functions
+from common_utils import getService, getAllText
 
 doc = r"""
 Usage: ./ExtractNotes.py <presentation_id>
@@ -71,7 +44,7 @@ def main():
         notesId = notesPage["notesProperties"]["speakerNotesObjectId"]
         for element in notesPage['pageElements']:
             if element['objectId'] == notesId:
-              tryParse(element)
+              print(getAllText(element))
 
 if __name__ == '__main__':
     main()

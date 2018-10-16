@@ -3,11 +3,6 @@
 # Compatibility with Python3
 from __future__ import print_function
 
-# Imports for Google APIs
-from googleapiclient.discovery import build
-from httplib2 import Http
-from oauth2client import file, client, tools
-
 # Parsing options
 from docopt import docopt
 
@@ -19,17 +14,11 @@ from collections import defaultdict
 # Find slide boundaries
 import re
 
-# If modifying these scopes, delete the file token.json.
-SCOPES = 'https://www.googleapis.com/auth/presentations'
+# Common functions
+from common_utils import getService, getAllText
 
-def getService():
-    store = file.Storage('token.json')
-    creds = store.get()
-    if not creds or creds.invalid:
-        flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
-        creds = tools.run_flow(flow, store)
-    return build('slides', 'v1', http=creds.authorize(Http()))
-
+# Read speaker notes from a file delimited by 80 instances of '=' followed by
+# Slide # on another line.
 def parseNotes(notesFile):
     if not notesFile:
         return {}
@@ -59,22 +48,6 @@ def parseNotes(notesFile):
     if previousSlideNum:
         result[previousSlideNum] = "\n".join(currentLines)
     return result
-
-
-
-def tryParse(element):
-    textElements = []
-    try:
-      textElements = element['shape']['text']['textElements']
-    except:
-      pass
-
-    # print(textElements)
-    for text in textElements:
-      try:
-        print(text['textRun']['content'].encode('utf-8').strip())
-      except:
-        pass
 
 doc = r"""
 Usage: ./InsertNotes.py [-c] <presentation_id> [<notes>]
@@ -126,22 +99,6 @@ def main():
 	request["deleteText"]["textRange"]['type'] = 'ALL'
         return request
 
-    # Extact any and all texts from an element.
-    def getAllText(element):
-        textElements = []
-        output = ""
-        try:
-          textElements = element['shape']['text']['textElements']
-        except:
-          pass
-
-        # print(textElements)
-        for text in textElements:
-          try:
-            output += text['textRun']['content'].encode('utf-8').strip()
-          except:
-            pass
-        return output
     # pageElements are the elements of the notes page.
     def notesExist(notesId, pageElements):
         for element in pageElements:
